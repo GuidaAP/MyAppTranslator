@@ -1,18 +1,17 @@
- package com.example.alexg.myapplication1;
+package com.example.alexg.myapplication1;
 
- import java.util.ArrayList;
+import java.util.ArrayList;
 
- public class TranslateClient {
+//Не забывай про форматирование "Code -> Reformat code"
+public class TranslateClient {
 
-         private ArrayList<String> text;
+    private ArrayList<String> text;
 
-         public ArrayList<String> getData() {
+    public ArrayList<String> getData() {
+        return text;
+    }
 
-             return text;
-         }
-
-         public void setData(ArrayList<String> data){
-
-             this.text = data;
-         }
- }
+    public void setData(ArrayList<String> data) {
+        this.text = data;
+    }
+}

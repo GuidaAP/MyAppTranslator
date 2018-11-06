@@ -11,9 +11,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.alexg.myapplication1.MyApplication;
 import com.example.alexg.myapplication1.R;
 import com.example.alexg.myapplication1.TranslateClient;
+import com.example.alexg.myapplication1.network.NetworkManager;
 
 import java.util.ArrayList;
 
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void getTranslation() {
 
-        MyApplication.getForumServices().getTranslatedText(KEY, getTextFromUi(),
+        NetworkManager.getInstance().getForumServices().getTranslatedText(KEY, getTextFromUi(),
                   getFromToLangCode()).enqueue(new Callback<TranslateClient>() {
             @Override
             public void onResponse(Call<TranslateClient> call, Response<TranslateClient> response) {
