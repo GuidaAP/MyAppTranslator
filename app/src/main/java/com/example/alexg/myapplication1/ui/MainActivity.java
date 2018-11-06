@@ -26,14 +26,15 @@ import static com.example.alexg.myapplication1.utils.Preferences.e;
 public class MainActivity extends AppCompatActivity {
     //Лучше инкапсулировать вызов в отдельном классе. Тогда и ключ туда переедит (а лучше в ресурсы strings), и переиспользовать сможешь
     private final String KEY = "trnsl.1.1.20180918T191252Z.53cbfd5ec3f05d84.a986297002dc1543176eed7608cac41660f7724a";
-    private Spinner listLang1,
-            listLang2;
+    //Понятные имена. Лучше разделять объявление полей
+    private Spinner langFromSpinner;
+    private Spinner langToSpinner;
     private String lang;
     private EditText textToTranslate;
     private TextView translatedText;
     private ImageButton revertLang;
-    private Button buttonTranslate,
-            clearText;
+    private Button buttonTranslate;
+    private Button clearText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,9 +63,9 @@ public class MainActivity extends AppCompatActivity {
                         getTranslation();
                         break;
                     case R.id.imageButtonRevert:
-                        int fromLangId = listLang1.getSelectedItemPosition();
-                        listLang1.setSelection(listLang2.getSelectedItemPosition());
-                        listLang2.setSelection(fromLangId);
+                        int fromLangId = langFromSpinner.getSelectedItemPosition();
+                        langFromSpinner.setSelection(langToSpinner.getSelectedItemPosition());
+                        langToSpinner.setSelection(fromLangId);
                         break;
                     case R.id.clear_text:
                         textToTranslate.getText().clear();
@@ -87,8 +88,8 @@ public class MainActivity extends AppCompatActivity {
         //лучше давать понятные имена, даже если это локальная переменная. И про generic не забывать
         ArrayAdapter<String> langsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, data);
         langsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        listLang1.setAdapter(langsAdapter);
-        listLang2.setAdapter(langsAdapter);
+        langFromSpinner.setAdapter(langsAdapter);
+        langToSpinner.setAdapter(langsAdapter);
     }
 
     private void getTranslation() {
@@ -117,8 +118,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getFromToLangCode() {
-        String from = listLang1.getSelectedItem().toString();
-        String to = listLang2.getSelectedItem().toString();
+        String from = langFromSpinner.getSelectedItem().toString();
+        String to = langToSpinner.getSelectedItem().toString();
         //StringBuilder ни к чему. Он полезен только в циклах
         return from + "-" + to;
     }
@@ -127,8 +128,8 @@ public class MainActivity extends AppCompatActivity {
      * Посмотри http://jakewharton.github.io/butterknife/.
      * */
     private void initVariables() {
-        listLang1 = findViewById(R.id.firstValueSpiner);
-        listLang2 = findViewById(R.id.secondValueSpinner);
+        langFromSpinner = findViewById(R.id.firstValueSpiner);
+        langToSpinner = findViewById(R.id.secondValueSpinner);
         textToTranslate = findViewById(R.id.editText);
         translatedText = findViewById(R.id.textView);
         revertLang = findViewById(R.id.imageButtonRevert);
