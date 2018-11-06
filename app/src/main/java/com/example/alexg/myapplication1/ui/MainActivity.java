@@ -24,7 +24,7 @@ import retrofit2.Response;
 import static com.example.alexg.myapplication1.utils.Preferences.e;
 
 public class MainActivity extends AppCompatActivity {
-
+    //Лучше инкапсулировать вызов в отдельном классе. Тогда и ключ туда переедит (а лучше в ресурсы strings), и переиспользовать сможешь
     private final String KEY = "trnsl.1.1.20180918T191252Z.53cbfd5ec3f05d84.a986297002dc1543176eed7608cac41660f7724a";
     private Spinner listLang1,
             listLang2;
@@ -43,31 +43,37 @@ public class MainActivity extends AppCompatActivity {
         initVariables();
         initSpinner();
 
-        buttonTranslate.setOnClickListener(getListener());
-        revertLang.setOnClickListener(getListener());
-        clearText.setOnClickListener(getListener());
+        //всем можно задать один листенер, так как он не содержит состояние
+        View.OnClickListener listener = getListener();
+        buttonTranslate.setOnClickListener(listener);
+        revertLang.setOnClickListener(listener);
+        clearText.setOnClickListener(listener);
 
     }
 
     private View.OnClickListener getListener() {
-
-        View.OnClickListener listener = new View.OnClickListener() {
+        return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int id = v.getId();
-                if (id == buttonTranslate.getId()) {
-                    getTranslation();
-                } else if (id == revertLang.getId()) {
-                    int fromLangId = listLang1.getSelectedItemPosition();
-                    listLang1.setSelection(listLang2.getSelectedItemPosition());
-                    listLang2.setSelection(fromLangId);
-                } else if (id == clearText.getId()) {
-                    textToTranslate.getText().clear();
-
+                //switch-case всегда предпочтительнее, так как легче читается.
+                // Вообще, лучше создавать для каждого свой листенер. Чтобы не было много кода, почитай про лямбды
+                switch (v.getId()) {
+                    case R.id.buttonTranslate:
+                        getTranslation();
+                        break;
+                    case R.id.imageButtonRevert:
+                        int fromLangId = listLang1.getSelectedItemPosition();
+                        listLang1.setSelection(listLang2.getSelectedItemPosition());
+                        listLang2.setSelection(fromLangId);
+                        break;
+                    case R.id.clear_text:
+                        textToTranslate.getText().clear();
+                        break;
+                    default:
+                        throw new IllegalArgumentException("No handler for id " + v.getId());
                 }
             }
         };
-        return listener;
     }
 
     private void initSpinner() {
@@ -86,17 +92,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getTranslation() {
-
+        //Почитай про MVP архитектуру.
         NetworkManager.getInstance().getForumServices().getTranslatedText(KEY, getTextFromUi(),
                 getFromToLangCode()).enqueue(new Callback<TranslateClient>() {
             @Override
             public void onResponse(Call<TranslateClient> call, Response<TranslateClient> response) {
                 if (response.isSuccessful())
+                    //Возможно NPE здесь
                     translatedText.setText(response.body().getData().get(0));
                 else
-                    //getTextFromUi();
                     Toast.makeText(getApplicationContext(), "Write text to translate", Toast.LENGTH_SHORT).show();
-                //Toast.makeText(getApplicationContext(), "Smth went wrong", Toast.LENGTH_SHORT).show();
             }
 
             @Override
