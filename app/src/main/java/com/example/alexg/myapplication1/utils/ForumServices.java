@@ -8,7 +8,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface ForumServices {
-
+    //тут лишний "?". ? отделяет основной адрес от параметров. Ретрофит сам его добавляет
     @GET("translate?")
     Call<TranslateClient> getTranslatedText(@Query("key")String key, @Query("text") String text, @Query("lang") String lang);
 

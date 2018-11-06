@@ -11,9 +11,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.alexg.myapplication1.MyApplication;
 import com.example.alexg.myapplication1.R;
 import com.example.alexg.myapplication1.TranslateClient;
+import com.example.alexg.myapplication1.network.NetworkManager;
 
 import java.util.ArrayList;
 
@@ -24,16 +24,17 @@ import retrofit2.Response;
 import static com.example.alexg.myapplication1.utils.Preferences.e;
 
 public class MainActivity extends AppCompatActivity {
-
+    //Лучше инкапсулировать вызов в отдельном классе. Тогда и ключ туда переедит (а лучше в ресурсы strings), и переиспользовать сможешь
     private final String KEY = "trnsl.1.1.20180918T191252Z.53cbfd5ec3f05d84.a986297002dc1543176eed7608cac41660f7724a";
-    private Spinner      listLang1,
-                         listLang2;
-    private String       lang;
-    private EditText     textToTranslate;
-    private TextView     translatedText;
-    private ImageButton  revertLang;
-    private Button       buttonTranslate,
-                         clearText;
+    //Понятные имена. Лучше разделять объявление полей
+    private Spinner langFromSpinner;
+    private Spinner langToSpinner;
+    private String lang;
+    private EditText textToTranslate;
+    private TextView translatedText;
+    private ImageButton revertLang;
+    private Button buttonTranslate;
+    private Button clearText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,59 +44,65 @@ public class MainActivity extends AppCompatActivity {
         initVariables();
         initSpinner();
 
-        buttonTranslate.setOnClickListener(getListener());
-        revertLang.     setOnClickListener(getListener());
-        clearText.      setOnClickListener(getListener());
+        //всем можно задать один листенер, так как он не содержит состояние
+        View.OnClickListener listener = getListener();
+        buttonTranslate.setOnClickListener(listener);
+        revertLang.setOnClickListener(listener);
+        clearText.setOnClickListener(listener);
 
     }
 
     private View.OnClickListener getListener() {
-
-        View.OnClickListener listener = new View.OnClickListener() {
+        return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int id = v.getId();
-                if(id == buttonTranslate.getId()) {
-                    getTranslation();
-                } else if (id == revertLang.getId()) {
-                    int fromLangId = listLang1.getSelectedItemPosition();
-                    listLang1.setSelection(listLang2.getSelectedItemPosition());
-                    listLang2.setSelection(fromLangId);
-                } else if (id == clearText.getId()) {
-                    textToTranslate.getText().clear();
-
+                //switch-case всегда предпочтительнее, так как легче читается.
+                // Вообще, лучше создавать для каждого свой листенер. Чтобы не было много кода, почитай про лямбды
+                switch (v.getId()) {
+                    case R.id.buttonTranslate:
+                        getTranslation();
+                        break;
+                    case R.id.imageButtonRevert:
+                        int fromLangId = langFromSpinner.getSelectedItemPosition();
+                        langFromSpinner.setSelection(langToSpinner.getSelectedItemPosition());
+                        langToSpinner.setSelection(fromLangId);
+                        break;
+                    case R.id.clear_text:
+                        textToTranslate.getText().clear();
+                        break;
+                    default:
+                        throw new IllegalArgumentException("No handler for id " + v.getId());
                 }
             }
         };
-        return listener;
     }
 
     private void initSpinner() {
-        ArrayList<String> data = new ArrayList();
+        ArrayList<String> data = new ArrayList<>();
         data.add("en");
         data.add("ru");
         data.add("fr");
         data.add("de");
         data.add("it");
 
-        ArrayAdapter aA = new ArrayAdapter(this,android.R.layout.simple_spinner_item, data);
-        aA.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        listLang1.setAdapter(aA);
-        listLang2.setAdapter(aA);
+        //лучше давать понятные имена, даже если это локальная переменная. И про generic не забывать
+        ArrayAdapter<String> langsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, data);
+        langsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        langFromSpinner.setAdapter(langsAdapter);
+        langToSpinner.setAdapter(langsAdapter);
     }
 
     private void getTranslation() {
-
-        MyApplication.getForumServices().getTranslatedText(KEY, getTextFromUi(),
-                  getFromToLangCode()).enqueue(new Callback<TranslateClient>() {
+        //Почитай про MVP архитектуру.
+        NetworkManager.getInstance().getForumServices().getTranslatedText(KEY, getTextFromUi(),
+                getFromToLangCode()).enqueue(new Callback<TranslateClient>() {
             @Override
             public void onResponse(Call<TranslateClient> call, Response<TranslateClient> response) {
                 if (response.isSuccessful())
+                    //Возможно NPE здесь
                     translatedText.setText(response.body().getData().get(0));
                 else
-                    //getTextFromUi();
                     Toast.makeText(getApplicationContext(), "Write text to translate", Toast.LENGTH_SHORT).show();
-                   //Toast.makeText(getApplicationContext(), "Smth went wrong", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -106,28 +113,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getTextFromUi() {
-        String text = textToTranslate.getText().toString();
-        if (text != null)
-            return text;
-        else
-            return "Write text to translate";
+        //Нужно смотреть подсказки студии. В данном случае text никогда не мог быть null,
+        return textToTranslate.getText().toString();
     }
 
     private String getFromToLangCode() {
-       String from =  listLang1.getSelectedItem().toString();
-       String to = listLang2.getSelectedItem().toString();
-       StringBuilder answer = new StringBuilder(from + "-" + to);
-        return answer.toString();
+        String from = langFromSpinner.getSelectedItem().toString();
+        String to = langToSpinner.getSelectedItem().toString();
+        //StringBuilder ни к чему. Он полезен только в циклах
+        return from + "-" + to;
     }
 
+    /*
+     * Посмотри http://jakewharton.github.io/butterknife/.
+     * */
     private void initVariables() {
-        listLang1 =       findViewById(R.id.firstValueSpiner);
-        listLang2 =       findViewById(R.id.secondValueSpinner);
+        langFromSpinner = findViewById(R.id.firstValueSpiner);
+        langToSpinner = findViewById(R.id.secondValueSpinner);
         textToTranslate = findViewById(R.id.editText);
-        translatedText =  findViewById(R.id.textView);
-        revertLang =      findViewById(R.id.imageButtonRevert);
+        translatedText = findViewById(R.id.textView);
+        revertLang = findViewById(R.id.imageButtonRevert);
         buttonTranslate = findViewById(R.id.buttonTranslate);
-        clearText =       findViewById(R.id.clear_text);
-        lang =            "en-ru";
+        clearText = findViewById(R.id.clear_text);
+        lang = "en-ru";
     }
 }
