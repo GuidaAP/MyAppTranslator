@@ -26,14 +26,14 @@ import static com.example.alexg.myapplication1.utils.Preferences.e;
 public class MainActivity extends AppCompatActivity {
 
     private final String KEY = "trnsl.1.1.20180918T191252Z.53cbfd5ec3f05d84.a986297002dc1543176eed7608cac41660f7724a";
-    private Spinner      listLang1,
-                         listLang2;
-    private String       lang;
-    private EditText     textToTranslate;
-    private TextView     translatedText;
-    private ImageButton  revertLang;
-    private Button       buttonTranslate,
-                         clearText;
+    private Spinner listLang1,
+            listLang2;
+    private String lang;
+    private EditText textToTranslate;
+    private TextView translatedText;
+    private ImageButton revertLang;
+    private Button buttonTranslate,
+            clearText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +44,8 @@ public class MainActivity extends AppCompatActivity {
         initSpinner();
 
         buttonTranslate.setOnClickListener(getListener());
-        revertLang.     setOnClickListener(getListener());
-        clearText.      setOnClickListener(getListener());
+        revertLang.setOnClickListener(getListener());
+        clearText.setOnClickListener(getListener());
 
     }
 
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 int id = v.getId();
-                if(id == buttonTranslate.getId()) {
+                if (id == buttonTranslate.getId()) {
                     getTranslation();
                 } else if (id == revertLang.getId()) {
                     int fromLangId = listLang1.getSelectedItemPosition();
@@ -71,23 +71,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initSpinner() {
-        ArrayList<String> data = new ArrayList();
+        ArrayList<String> data = new ArrayList<>();
         data.add("en");
         data.add("ru");
         data.add("fr");
         data.add("de");
         data.add("it");
 
-        ArrayAdapter aA = new ArrayAdapter(this,android.R.layout.simple_spinner_item, data);
-        aA.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        listLang1.setAdapter(aA);
-        listLang2.setAdapter(aA);
+        //лучше давать понятные имена, даже если это локальная переменная. И про generic не забывать
+        ArrayAdapter<String> langsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, data);
+        langsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        listLang1.setAdapter(langsAdapter);
+        listLang2.setAdapter(langsAdapter);
     }
 
     private void getTranslation() {
 
         NetworkManager.getInstance().getForumServices().getTranslatedText(KEY, getTextFromUi(),
-                  getFromToLangCode()).enqueue(new Callback<TranslateClient>() {
+                getFromToLangCode()).enqueue(new Callback<TranslateClient>() {
             @Override
             public void onResponse(Call<TranslateClient> call, Response<TranslateClient> response) {
                 if (response.isSuccessful())
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                 else
                     //getTextFromUi();
                     Toast.makeText(getApplicationContext(), "Write text to translate", Toast.LENGTH_SHORT).show();
-                   //Toast.makeText(getApplicationContext(), "Smth went wrong", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), "Smth went wrong", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -106,28 +107,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getTextFromUi() {
-        String text = textToTranslate.getText().toString();
-        if (text != null)
-            return text;
-        else
-            return "Write text to translate";
+        //Нужно смотреть подсказки студии. В данном случае text никогда не мог быть null,
+        return textToTranslate.getText().toString();
     }
 
     private String getFromToLangCode() {
-       String from =  listLang1.getSelectedItem().toString();
-       String to = listLang2.getSelectedItem().toString();
-       StringBuilder answer = new StringBuilder(from + "-" + to);
-        return answer.toString();
+        String from = listLang1.getSelectedItem().toString();
+        String to = listLang2.getSelectedItem().toString();
+        //StringBuilder ни к чему. Он полезен только в циклах
+        return from + "-" + to;
     }
 
+    /*
+     * Посмотри http://jakewharton.github.io/butterknife/.
+     * */
     private void initVariables() {
-        listLang1 =       findViewById(R.id.firstValueSpiner);
-        listLang2 =       findViewById(R.id.secondValueSpinner);
+        listLang1 = findViewById(R.id.firstValueSpiner);
+        listLang2 = findViewById(R.id.secondValueSpinner);
         textToTranslate = findViewById(R.id.editText);
-        translatedText =  findViewById(R.id.textView);
-        revertLang =      findViewById(R.id.imageButtonRevert);
+        translatedText = findViewById(R.id.textView);
+        revertLang = findViewById(R.id.imageButtonRevert);
         buttonTranslate = findViewById(R.id.buttonTranslate);
-        clearText =       findViewById(R.id.clear_text);
-        lang =            "en-ru";
+        clearText = findViewById(R.id.clear_text);
+        lang = "en-ru";
     }
 }
