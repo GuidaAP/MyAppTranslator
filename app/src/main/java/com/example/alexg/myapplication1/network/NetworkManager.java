@@ -10,7 +10,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * */
 public class NetworkManager {
 
-    private static final String baseUrl = "https://translate.yandex.net/api/v1.5/tr.json/";
+    //naming convention
+    private static final String BASE_URL = "https://translate.yandex.net/api/v1.5/tr.json/";
     private Retrofit retrofit = null;
     private ForumServices forumServices = null;
 
@@ -34,7 +35,7 @@ public class NetworkManager {
     private Retrofit getRetrofit() {
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
-                    .baseUrl(baseUrl)                                               //Базовая часть адреса
+                    .baseUrl(BASE_URL)                                               //Базовая часть адреса
                     .addConverterFactory(GsonConverterFactory.create())            //Конвертер, необходимый для преобразования JSON'а в объекты
                     .build();
         }

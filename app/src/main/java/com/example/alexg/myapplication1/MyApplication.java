@@ -11,5 +11,5 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Название вводит в заблуждение. В андроид есть класс {@link Application}
  */
 public class MyApplication  {
-
+    //moved to NetworkManager
 }
